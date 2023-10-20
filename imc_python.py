@@ -34,23 +34,45 @@ now = datetime.now()
 date_actuelle = now.strftime('%Y-%m-%d %H:%M:%S')
 con = sqlite3.connect("imc.db")
 cur = con.cursor()
-cur.execute('''
-    CREATE TABLE users_imc (
-        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        first_name TEXT,
-        last_name TEXT,
-        email TEXT UNIQUE,
-        address TEXT,
-		date_created DATETIME
-    )
-''')
+
+# Création de la première table utilisateur 
+# cur.execute('''
+#     CREATE TABLE users_imc (
+#         user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+#         username TEXT NOT NULL UNIQUE,
+#         first_name TEXT,
+#         last_name TEXT,
+#         email TEXT UNIQUE,
+#         address TEXT,
+# 		date_created DATETIME
+#     )
+# ''')
 #res = cur.execute("SELECT name FROM sqlite_master") 
 #res.fetchone()
 insert_query = "INSERT INTO users_imc (username, first_name, last_name, email, address, date_created) VALUES (?, ?, ?, ?, ?, ?)"
 user_data = (pseudo_utilisateur, prenom_utilisateur, nom_utilisateur, mail_utilisateur, adresse_utilisateur, date_actuelle )
-
 cur.execute(insert_query, user_data)
+
+#Création de la deuxième table BMI
+# cur.execute('''
+#     CREATE TABLE bmi_imc (
+#         bmi_id INTEGER PRIMARY KEY AUTOINCREMENT,
+# 		user_id INTEGER,
+#         weight INTEGER,
+#         height FLOAT,
+#         bmi_value FLOAT,
+#         date_recorded DATETIME,
+# 		CONSTRAINT fk_bmi_imc_users_imc FOREIGN KEY (user_id) REFERENCES users_imc (user_id) ON DELETE NO ACTION ON UPDATE CASCADE
+#     )
+# ''')
+
+cur.execute("SELECT user_id FROM users_imc WHERE username = ?", (pseudo_utilisateur,))
+user_id = cur.fetchone()[0]
+insert_query_bmi = "INSERT INTO bmi_imc (user_id, weight, height, bmi_value, date_recorded) VALUES (?, ?, ?, ?, ?)"
+user_data_bmi = (user_id, poids_utilisateur, taille_utilisateur, imc, date_actuelle )
+cur.execute(insert_query_bmi, user_data_bmi)
+
+
 
 con.commit()
 con.close()
